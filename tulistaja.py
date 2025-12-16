@@ -1,48 +1,63 @@
 import pygame
+from sätted import AKEN_LAIUS, ÜLEMINE_ÄÄR
 
-pygame.init()
-screen = pygame.display.set_mode((600, 300))
-
-player_x = 300 #aluse keskpunkt
-player_y = 270 #aluse keskpunkt
-player_high = 30 
-speed = 0.1
-
-bullets =[]
-bullet_speed = 0.2
+bullet_speed = 10
 bullet_width = 4
 bullet_height = 8
 
-running = True
-while running:
+mängija_pilt = pygame.image.load("pildid/tulistaja.png")
+mängija_pilt = pygame.transform.smoothscale(mängija_pilt, (30, 30))
 
-    screen.fill((5, 5, 5))
+kuuli_pilt = pygame.image.load("pildid/bullet1.png")
+kuuli_pilt = pygame.transform.smoothscale(kuuli_pilt, (bullet_width, bullet_height))
 
-    player_points = [
-        (player_x, player_y - player_high), 
-        (player_x - player_high // 2, player_y),
-        (player_x + player_high // 2, player_y),
-    ]
 
-    pygame.draw.polygon(screen, (250, 250, 250), player_points) #kolmnurk
-
-    for bullet in bullets:
-        bullet[1] -= bullet_speed
-        pygame.draw.rect(screen, (250, 250, 250), bullet)
-
-    pygame.display.update()
-
-    for event in pygame.event.get(): 
-        if event.type == pygame.QUIT:
-            running = False
+def mängija_loogika(nupuvajutused, kuulid, mängija):
+    for event in nupuvajutused:
         if event.type == pygame.KEYDOWN:
+
+            if event.key == pygame.K_LEFT:
+                if mängija["x"] - mängija["size"] // 2 > 0:
+                    mängija["x"] -= 5
+
+            if event.key == pygame.K_RIGHT:
+                if mängija["x"] + mängija["size"] // 2 < AKEN_LAIUS:
+                    mängija["x"] += 5
+
             if event.key == pygame.K_SPACE:
-                bullets.append([player_x - bullet_width // 2, player_y - player_high, bullet_width, bullet_height])
+                kuulid.append([
+                    mängija["x"] - bullet_width // 2,
+                    mängija["y"] - mängija["size"],
+                    bullet_width,
+                    bullet_height
+                ])
 
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT] and player_x - player_high // 2 > 0:
-        player_x -= speed
-    if keys[pygame.K_RIGHT] and player_x + player_high // 2 < 600:
-        player_x += speed
 
-pygame.quit()
+def kuulide_loogika(kuulid):
+    for kuul in kuulid[:]:
+        kuul[1] -= bullet_speed
+        if kuul[1] < 0:
+            kuulid.remove(kuul)
+
+
+def mängija_joonistamine(aken, mängija):
+    rect = mängija_pilt.get_rect(center=(mängija["x"], mängija["y"]))
+    aken.blit(mängija_pilt, rect)
+
+
+def kuulide_joonistamine(aken, kuulid, põrked):
+    for kuul in kuulid[:]:
+
+        # eemaldada kokku põrganud kuulid
+        if kuul in põrked.get["Kuul", []]:
+            kuulid.remove(kuul)
+            continue
+
+        # eemaldada kuulid, mis lendavad ekraani ülaosast kaugemale
+        if kuul[1] < ÜLEMINE_ÄÄR:
+            kuulid.remove(kuul)
+            continue
+
+        # kuuli joonistamine
+        rect = kuuli_pilt.get_rect(topleft=(kuul[0], kuul[1]))
+        aken.blit(kuuli_pilt, rect)

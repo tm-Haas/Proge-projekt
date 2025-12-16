@@ -8,6 +8,12 @@ from random import randint, choice
 from pygame import font
 from asteroidid_ja_vaenlased import Asteroid, Vaenlane
 from sätted import *
+from tulistaja import (   
+    mängija_loogika,  
+    kuulide_loogika,  
+    mängija_joonistamine,  
+    kuulide_joonistamine    
+)
 
 #TO-DO: Start menüü, suremismenüü: ehk paar nuppu ja ilusad pildid
 #vb ka hääli
@@ -103,12 +109,15 @@ def vastaste_loogika(asteroidid:list,vaenlased:list) -> None:
 
 
 #Eeldan et argumentideks tulevad nupuvajutused
+#Need fuktioonid on eraldi failis tulistaja
+'''
 def mängija_loogika(nupuvajutused:list[EventType],kuulid) -> None:
     #tantsib ringi teeb asju ja laseb kuule
     pass
 
 def kuulide_loogika(kuulid) -> None:
     pass
+'''
 
 def vastaste_joonistamine(asteroidid:list,vaenlased:list) -> None:
 
@@ -117,6 +126,8 @@ def vastaste_joonistamine(asteroidid:list,vaenlased:list) -> None:
     for asteroid in asteroidid:
         asteroid.joonista_asteroid(aken)
 
+#failis tulistaja
+'''
 def mängija_joonistamine(mängija) -> None:
     #aken.blit(pilt, rect)
     pass
@@ -127,6 +138,7 @@ def kuulide_joonistamine(mängija,põrked) -> None:
     #samuti hävitada need kuulid kes on kellegagi kokku põrganud
     #aken.blit(pilt, rect)
     pass
+'''
 
 def skoori_joonistamine(skoor,font) -> None:
     #Font on comic sans ;)
@@ -135,7 +147,7 @@ def skoori_joonistamine(skoor,font) -> None:
     aken.blit(tekst,teksti_asukoht)
 # Game loop
 def mäng() -> None:
-    mängija = None
+    mängija = {"x": 300, "y": 270, "size": 30}
     kuulid = []
     asteroidid = []
     vaenlased = []
@@ -152,7 +164,7 @@ def mäng() -> None:
      
         vastaste_loogika(asteroidid,vaenlased)
         kattumise_lahendaja(asteroidid,vaenlased) #just in case
-        mängija_loogika(nupuvajutused,kuulid)
+        mängija_loogika(nupuvajutused, kuulid, mängija)
         kuulide_loogika(kuulid)
         põrked = kokkupõrke_lahendaja(kuulid,asteroidid,vaenlased,mängija = mängija)
         skoor += punkti_koguja(põrked,skoor)
@@ -161,9 +173,9 @@ def mäng() -> None:
         aken.fill(pygame.Color(VÄRSKENDUSVÄRV)) #Teeb puhta lehe mille peale saab joonistada
         # Pärast seda tuleb kaardile joonistamine
 
-        kuulide_joonistamine(kuulid,põrked)
+        kuulide_joonistamine(aken, kuulid, põrked)
         vastaste_joonistamine(asteroidid,vaenlased)
-        mängija_joonistamine(mängija)
+        mängija_joonistamine(aken, mängija)
         skoori_joonistamine(skoor,font)
 
         #kas tal on elu? vist mitte
