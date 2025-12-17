@@ -4,6 +4,7 @@ from sätted import AKEN_LAIUS, ÜLEMINE_ÄÄR
 bullet_speed = 10
 bullet_width = 4
 bullet_height = 8
+shoot_cooldown = 300
 
 mängija_pilt = pygame.image.load("pildid/tulistaja.png")
 mängija_pilt = pygame.transform.smoothscale(mängija_pilt, (30, 30))
@@ -11,8 +12,12 @@ mängija_pilt = pygame.transform.smoothscale(mängija_pilt, (30, 30))
 kuuli_pilt = pygame.image.load("pildid/bullet1.png")
 kuuli_pilt = pygame.transform.smoothscale(kuuli_pilt, (bullet_width, bullet_height))
 
+viimane_shoot_aeg = 0
 
 def mängija_loogika(nupuvajutused, kuulid, mängija):
+    global viimane_shoot_aeg
+    current_time = pygame.time.get_ticks()
+
     for event in nupuvajutused:
         if event.type == pygame.KEYDOWN:
 
@@ -25,12 +30,15 @@ def mängija_loogika(nupuvajutused, kuulid, mängija):
                     mängija["x"] += 5
 
             if event.key == pygame.K_SPACE:
-                kuulid.append([
-                    mängija["x"] - bullet_width // 2,
-                    mängija["y"] - mängija["size"],
-                    bullet_width,
-                    bullet_height
-                ])
+                if current_time - viimane_shoot_aeg >= shoot_cooldown:
+                    kuulid.append([
+                        mängija["x"] - bullet_width // 2,
+                        mängija["y"] - mängija["size"],
+                        bullet_width,
+                        bullet_height
+                    ])
+                    viimane_shoot_aeg = current_time
+
 
 
 def kuulide_loogika(kuulid):
@@ -49,7 +57,7 @@ def kuulide_joonistamine(aken, kuulid, põrked):
     for kuul in kuulid[:]:
 
         # eemaldada kokku põrganud kuulid
-        if kuul in põrked.get["Kuul", []]:
+        if kuul in põrked.get("Kuul", []):
             kuulid.remove(kuul)
             continue
 
