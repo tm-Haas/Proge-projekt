@@ -2,12 +2,15 @@ import pygame
 from sätted import AKEN_LAIUS, ÜLEMINE_ÄÄR
 
 bullet_speed = 10
-bullet_width = 4
-bullet_height = 8
+bullet_width = 8
+bullet_height = 16
 shoot_cooldown = 300
 
+mängija_suurus = 50
+kiirus = 6
+
 mängija_pilt = pygame.image.load("pildid/tulistaja.png")
-mängija_pilt = pygame.transform.smoothscale(mängija_pilt, (30, 30))
+mängija_pilt = pygame.transform.smoothscale(mängija_pilt, (mängija_suurus, mängija_suurus))
 
 kuuli_pilt = pygame.image.load("pildid/bullet1.png")
 kuuli_pilt = pygame.transform.smoothscale(kuuli_pilt, (bullet_width, bullet_height))
@@ -17,9 +20,8 @@ viimane_shoot_aeg = 0
 def mängija_loogika(nupud, kuulid, mängija):
     global viimane_shoot_aeg
     current_time = pygame.time.get_ticks()
-
-    kiirus = 6
     
+
     #liikumine
     if nupud[pygame.K_LEFT]:
         mängija["x"] -= kiirus
@@ -32,7 +34,7 @@ def mängija_loogika(nupud, kuulid, mängija):
         if current_time - viimane_shoot_aeg >= shoot_cooldown:
             kuulid.append({
                 "x": mängija["x"] - bullet_width // 2,
-                "y": mängija["y"] - mängija["size"] // 2,
+                "y": mängija["y"] - mängija_suurus // 2,
                 "width": bullet_width,
                 "height": bullet_height
             })
