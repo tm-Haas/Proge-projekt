@@ -49,10 +49,32 @@ def kattumise_lahendaja(*args:list) -> None:
 #Nendeks oleksid siis: Kuulid + vaenlased ja asteroidid. Mängija + vaenlased ja asteroidid.
 #See on üldine funktsioon ja tagastasb kes põrkus kokku kellega sõnastiku vormis
 
-def kokkupõrke_lahendaja(*args:list, mängija = None) -> dict[str,list]:
+def kokkupõrke_lahendaja(kuulid, asteroidid, vaenlased, mängija = None) -> dict[str,list]:
     vastus = {"Kuul":[],"Mängija":[]}
-    for jada in args:
-        pass
+    #kuuli ja asteroidi kokkupõrge
+    for kuul in kuulid:
+        for asteroid in asteroidid:
+            if pygame.Rect(kuul["x"], kuul["y"], kuul["width"], kuul["height"]).colliderect(pygame.Rect(asteroid.x, asteroid.y, asteroid.size, asteroid.size)):
+                vastus["Kuul"].append(kuul)
+    #kuuli ja vaenlase kokkupõrge
+        for vaenlane in vaenlased:
+            if pygame.Rect(kuul["x"], kuul["y"], kuul["width"], kuul["height"]).colliderect(pygame.Rect(vaenlane.x, vaenlane.y, vaenlane.size, vaenlane.size)):
+                vastus["Kuul"].append(kuul)
+
+    #mängija ja asteroidi/vaenlase kokkupõrge
+    if mängija:
+        mängija_rect = pygame.Rect(mängija["x"] - mängija["size"] // 2, mängija["y"] - mängija["size"] // 2, mängija["size"], mängija["size"])
+        
+        for asteroid in asteroidid:
+            asteroid_rect = pygame.Rect(asteroid.x, asteroid.y, asteroid.size, asteroid.size)
+            if mängija_rect.colliderect(asteroid_rect):
+                vastus["Mängija"].append(asteroid)
+        
+        for vaenlane in vaenlased:
+            vaenlane_rect = pygame.Rect(vaenlane.x, vaenlane.y, vaenlane.size, vaenlane.size)
+            if mängija_rect.colliderect(vaenlane):
+                vastus["Mängija"].append(vaenlane)
+
     return vastus
 
 
@@ -202,7 +224,7 @@ def game_over_menu(skoor:int) -> bool:
 
 # Game loop
 def mäng() -> None:
-    mängija = {"x": 300, "y": 270, "size": 30}
+    mängija = {"x": 300, "y": 270, "size": 50}
     kuulid = []
     asteroidid = []
     vaenlased = []
