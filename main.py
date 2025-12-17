@@ -19,6 +19,9 @@ from tulistaja import (
 #vb ka hääli
 #...ja 99% koodist
 
+MENU = "menu"
+GAME = "game"
+GAME_OVER = "game_over"
 
 # Initialize Pygame
 pygame.init()
@@ -145,26 +148,85 @@ def skoori_joonistamine(skoor,font) -> None:
     tekst = font.render(f"Vaenlasi kõmmutatud: {skoor}",True, pygame.Color(FONT_VÄRV))
     teksti_asukoht = tekst.get_rect(topleft=(0,0))
     aken.blit(tekst,teksti_asukoht)
+
+def start_menu() -> bool:
+    suur_font = pygame.font.Font(FONT,72)
+    väike_font = pygame.font.Font(FONT, 36)
+
+    pealkiri = suur_font.render("mingi nimi", True, pygame.Color("black"))
+    start_text = väike_font.render("ENTER - alusta | ESC - välja", True, pygame.Color("black"))
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    return True
+                if event.key == pygame.K_ESCAPE:
+                    return False
+
+        aken.fill(pygame.Color(VÄRSKENDUSVÄRV))
+        aken.blit(pealkiri, pealkiri.get_rect(center=(AKEN_LAIUS//2, 200)))
+        aken.blit(start_text, start_text.get_rect(center=(AKEN_LAIUS//2, 350)))
+
+        pygame.display.flip()
+        kell.tick(60)
+
+def game_over_menu(skoor:int) -> bool:
+    suur_font = pygame.font.Font(FONT,64)
+    väike_font = pygame.font.Font(FONT, 36)
+
+    tekst = suur_font.render("GAME OVER", True, pygame.Color("black"))
+    score_text = väike_font.render(f"Skoor: {skoor}", True, pygame.Color("black"))
+    retry_text = väike_font.render("ENTER - alusta | ESC - välja", True, pygame.Color("black"))
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    return True
+                if event.key == pygame.K_ESCAPE:
+                    return False
+        
+        aken.fill(pygame.Color(VÄRSKENDUSVÄRV))
+        aken.blit(tekst, tekst.get_rect(center=(AKEN_LAIUS//2, 200)))
+        aken.blit(score_text, score_text.get_rect(center=(AKEN_LAIUS//2, 300)))
+        aken.blit(retry_text, retry_text.get_rect(center=(AKEN_LAIUS//2, 400)))
+        
+        pygame.display.flip()
+        kell.tick(60)
+
+
 # Game loop
 def mäng() -> None:
     mängija = {"x": 300, "y": 270, "size": 30}
     kuulid = []
     asteroidid = []
     vaenlased = []
+    '''
     global jookseb
     jookseb = True
+    '''
     skoor = 0
     font = pygame.font.Font(FONT,64)
-    while jookseb:
+    while True:
         #iga raam ikka uued nupuvajutused meil
-        nupuvajutused = []
-
+        
         for event in pygame.event.get():
+            '''
             mängu_kinnipaneku_kontroll(event)
+            '''
+            if event.type == pygame.QUIT:
+                return skoor
+        
      
         vastaste_loogika(asteroidid,vaenlased)
         kattumise_lahendaja(asteroidid,vaenlased) #just in case
-        mängija_loogika(nupuvajutused, kuulid, mängija)
+        nupud = pygame.key.get_pressed()
+        mängija_loogika(nupud, kuulid, mängija)
         kuulide_loogika(kuulid)
         põrked = kokkupõrke_lahendaja(kuulid,asteroidid,vaenlased,mängija = mängija)
         skoor += punkti_koguja(põrked,skoor)
@@ -178,16 +240,34 @@ def mäng() -> None:
         mängija_joonistamine(aken, mängija)
         skoori_joonistamine(skoor,font)
 
+        '''
         #kas tal on elu? vist mitte
         if "Mängija" in põrked.keys():
             break #you lost!!!!!
+        '''
+
+
+        if len(põrked["Mängija"]) > 0:
+            return skoor
 
         pygame.display.flip()
         
         kell.tick(FPS)
 
 
-
+'''
 mäng()
 # Quit Pygame
+pygame.quit()
+'''
+
+while True:
+    if not start_menu():
+        break
+
+    skoor = mäng()
+
+    if not game_over_menu(skoor):
+        break
+
 pygame.quit()

@@ -14,37 +14,36 @@ kuuli_pilt = pygame.transform.smoothscale(kuuli_pilt, (bullet_width, bullet_heig
 
 viimane_shoot_aeg = 0
 
-def mängija_loogika(nupuvajutused, kuulid, mängija):
+def mängija_loogika(nupud, kuulid, mängija):
     global viimane_shoot_aeg
     current_time = pygame.time.get_ticks()
 
-    for event in nupuvajutused:
-        if event.type == pygame.KEYDOWN:
+    kiirus = 6
+    
+    #liikumine
+    if nupud[pygame.K_LEFT]:
+        mängija["x"] -= kiirus
+    if nupud[pygame.K_RIGHT]:
+        mängija["x"] += kiirus
+    
+    mängija["x"] = max(0, min(AKEN_LAIUS, mängija["x"]))
 
-            if event.key == pygame.K_LEFT:
-                if mängija["x"] - mängija["size"] // 2 > 0:
-                    mängija["x"] -= 5
-
-            if event.key == pygame.K_RIGHT:
-                if mängija["x"] + mängija["size"] // 2 < AKEN_LAIUS:
-                    mängija["x"] += 5
-
-            if event.key == pygame.K_SPACE:
-                if current_time - viimane_shoot_aeg >= shoot_cooldown:
-                    kuulid.append([
-                        mängija["x"] - bullet_width // 2,
-                        mängija["y"] - mängija["size"],
-                        bullet_width,
-                        bullet_height
-                    ])
-                    viimane_shoot_aeg = current_time
+    if nupud[pygame.K_SPACE]:
+        if current_time - viimane_shoot_aeg >= shoot_cooldown:
+            kuulid.append({
+                "x": mängija["x"] - bullet_width // 2,
+                "y": mängija["y"] - mängija["size"] // 2,
+                "width": bullet_width,
+                "height": bullet_height
+            })
+            viimane_shoot_aeg = current_time
 
 
 
 def kuulide_loogika(kuulid):
     for kuul in kuulid[:]:
-        kuul[1] -= bullet_speed
-        if kuul[1] < 0:
+        kuul["y"] -= bullet_speed
+        if kuul["y"] + kuul["height"] < 0:
             kuulid.remove(kuul)
 
 
@@ -62,10 +61,10 @@ def kuulide_joonistamine(aken, kuulid, põrked):
             continue
 
         # eemaldada kuulid, mis lendavad ekraani ülaosast kaugemale
-        if kuul[1] < ÜLEMINE_ÄÄR:
+        if kuul["y"] < 0:
             kuulid.remove(kuul)
             continue
 
         # kuuli joonistamine
-        rect = kuuli_pilt.get_rect(topleft=(kuul[0], kuul[1]))
+        rect = kuuli_pilt.get_rect(topleft=(kuul["x"], kuul["y"]))
         aken.blit(kuuli_pilt, rect)
